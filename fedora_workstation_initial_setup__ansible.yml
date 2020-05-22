@@ -25,7 +25,7 @@
             - vim
             - dconf-editor
             - firefox-wayland
-	    - java-latest-openjdk-devel.x86_64
+            - java-latest-openjdk-devel.x86_64
             - awscli
             - python3-boto3  
          state: latest
