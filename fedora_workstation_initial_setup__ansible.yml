@@ -1,0 +1,65 @@
+################################################################ 
+# Ansible Playbook: fedora_workstation_initial_setup__ansible.yml
+#
+# Initial setup for Fedora Workstation
+#
+# 6/25/2019
+################################################################
+
+---
+- hosts: all
+  remote_user: bill
+  become: yes
+  become_user: root
+  become_method: sudo
+
+  tasks:
+     - name: Update all packages
+       dnf:
+         name: '*'
+         state: latest
+    
+     - name: Install packages that I use
+       dnf:
+         name:
+            - vim
+            - dconf-editor
+            - firefox-wayland
+	    - java-latest-openjdk-devel.x86_64
+            - awscli
+            - python3-boto3  
+         state: latest
+
+    - name: Install VirtualBox YUM repo
+      get_url:
+            url: http://download.virtualbox.org/virtualbox/rpm/fedora/virtualbox.repo
+            dest: /etc/yum.repos.d/
+    
+    - name: Install VirtualBox packages  
+      dnf:
+        name:
+           - '@Development tools'
+           - kernel-devel
+           - kernel-headers
+           - dkms
+           - qt5-qtx11extras
+           - elfutils-libelf-devel
+           - zlib-devel
+           - VirtualBox-6.0  
+        state: latest
+
+    - name: Install ffmpeg to enable playback of video on Twitter
+      shell: |
+          dnf -y install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+          dnf -y install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+   
+    - name: Disable print server
+      shell:  |
+          systemctl disable cups
+          systemctl stop cups
+   
+    - name: Add myself to sudoers
+      shell: echo "bill    ALL=(ALL)       ALL" >> /etc/sudoers
+   
+    - name: Add myself to vboxusers for VirtualBox
+      command: usermod -a -G vboxusers bill
